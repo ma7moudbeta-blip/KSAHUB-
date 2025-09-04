@@ -1,4 +1,4 @@
--- KSAHUB ( Steal a Brainrot ) - Stable Speed with Anti-Respawn
+-- KSAHUB ( Steal a Brainrot ) - Stable Speed
 -- By KSAHUB
 
 local Players = game:GetService("Players")
@@ -10,11 +10,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 local enabled = false
 local boostedSpeed = 32 -- default speed
 
--- Anti-Respawn System
-player.CharacterAdded:Connect(function(char)
-    char:WaitForChild("Humanoid").BreakJointsOnDeath = false
-end)
-
 -- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = playerGui
@@ -22,7 +17,7 @@ screenGui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0,180,0,100)
-frame.Position = UDim2.new(1,-190,0,20)
+frame.Position = UDim2.new(1,-190,0,20) -- فوق يمين
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.Active = true
 frame.Parent = screenGui
@@ -47,7 +42,7 @@ speedButton.TextColor3 = Color3.fromRGB(255,255,255)
 speedButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
 speedButton.Parent = frame
 
--- Slider Box
+-- Slider (TextBox + Label)
 local sliderBox = Instance.new("TextBox")
 sliderBox.Size = UDim2.new(0.45,0,0,30)
 sliderBox.Position = UDim2.new(0.5,0,0,30)
@@ -58,7 +53,6 @@ sliderBox.TextColor3 = Color3.fromRGB(255,255,255)
 sliderBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
 sliderBox.Parent = frame
 
--- Slider Label
 local sliderLabel = Instance.new("TextLabel")
 sliderLabel.Size = UDim2.new(1,0,0,25)
 sliderLabel.Position = UDim2.new(0,0,0,70)
@@ -81,7 +75,7 @@ speedButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Slider
+-- Update speed from slider
 sliderBox.FocusLost:Connect(function()
     local val = tonumber(sliderBox.Text)
     if val and val >= 16 and val <= 120 then
@@ -92,7 +86,7 @@ sliderBox.FocusLost:Connect(function()
     end
 end)
 
--- Draggable
+-- Draggable system
 local dragging, dragInput, dragStart, startPos
 frame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -117,14 +111,15 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Stable Speed
+-- Stable Speed system
 RunService.RenderStepped:Connect(function()
     if enabled then
         local char = player.Character
         if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
             local hum = char:FindFirstChild("Humanoid")
             local hrp = char:FindFirstChild("HumanoidRootPart")
-            hum.WalkSpeed = 16
+
+            hum.WalkSpeed = 16 -- سرعة أساسية عشان مانموتش
             if hum.MoveDirection.Magnitude > 0 then
                 hrp.Velocity = hum.MoveDirection * boostedSpeed + Vector3.new(0, hrp.Velocity.Y, 0)
             end
