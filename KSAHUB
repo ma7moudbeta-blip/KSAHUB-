@@ -1,4 +1,4 @@
--- Speed Bypass with Slider
+-- Stable Speed + Infinite Jump (Improved)
 -- By KSAHUB
 
 local Players = game:GetService("Players")
@@ -9,6 +9,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 local enabled = false
 local boostedSpeed = 32 -- default speed
+local infiniteJump = false -- toggle for jump
 
 -- GUI
 local screenGui = Instance.new("ScreenGui")
@@ -16,8 +17,8 @@ screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,180,0,100)
-frame.Position = UDim2.new(1,-190,0,20) -- فوق يمين
+frame.Size = UDim2.new(0,200,0,160)
+frame.Position = UDim2.new(1,-210,0,20) -- فوق يمين
 frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 frame.Active = true
 frame.Parent = screenGui
@@ -25,7 +26,7 @@ frame.Parent = screenGui
 -- Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,25)
-title.Text = "KSAHUB SPEED"
+title.Text = "KSAHUB"
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(255,255,255)
@@ -42,10 +43,21 @@ speedButton.TextColor3 = Color3.fromRGB(255,255,255)
 speedButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
 speedButton.Parent = frame
 
+-- Infinite Jump Button (Moved Down)
+local jumpButton = Instance.new("TextButton")
+jumpButton.Size = UDim2.new(0.45,0,0,30)
+jumpButton.Position = UDim2.new(0.5,0,0,70) -- تحت السرعة
+jumpButton.Text = "JUMP: OFF"
+jumpButton.TextScaled = true
+jumpButton.Font = Enum.Font.GothamBold
+jumpButton.TextColor3 = Color3.fromRGB(255,255,255)
+jumpButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+jumpButton.Parent = frame
+
 -- Slider (TextBox + Label)
 local sliderBox = Instance.new("TextBox")
 sliderBox.Size = UDim2.new(0.45,0,0,30)
-sliderBox.Position = UDim2.new(0.5,0,0,30)
+sliderBox.Position = UDim2.new(0.05,0,0,70)
 sliderBox.Text = tostring(boostedSpeed)
 sliderBox.TextScaled = true
 sliderBox.Font = Enum.Font.GothamBold
@@ -54,8 +66,8 @@ sliderBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
 sliderBox.Parent = frame
 
 local sliderLabel = Instance.new("TextLabel")
-sliderLabel.Size = UDim2.new(1,0,0,25)
-sliderLabel.Position = UDim2.new(0,0,0,70)
+sliderLabel.Size = UDim2.new(0.9,0,0,30)
+sliderLabel.Position = UDim2.new(0.05,0,0,110)
 sliderLabel.Text = "Speed: "..boostedSpeed
 sliderLabel.BackgroundTransparency = 1
 sliderLabel.Font = Enum.Font.GothamBold
@@ -75,10 +87,22 @@ speedButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Toggle Infinite Jump
+jumpButton.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    if infiniteJump then
+        jumpButton.Text = "JUMP: ON"
+        jumpButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
+    else
+        jumpButton.Text = "JUMP: OFF"
+        jumpButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+    end
+end)
+
 -- Update speed from slider
 sliderBox.FocusLost:Connect(function()
     local val = tonumber(sliderBox.Text)
-    if val and val >= 16 and val <= 100 then
+    if val and val >= 16 and val <= 120 then
         boostedSpeed = val
         sliderLabel.Text = "Speed: "..boostedSpeed
     else
@@ -111,14 +135,28 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Speed system (Velocity Bypass)
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if enabled and char and char:FindFirstChild("HumanoidRootPart") then
-        local hrp = char.HumanoidRootPart
-        local moveDir = char:FindFirstChildOfClass("Humanoid").MoveDirection
-        if moveDir.Magnitude > 0 then
-            hrp.Velocity = moveDir * boostedSpeed
+-- Stable Speed system
+RunService.RenderStepped:Connect(function()
+    if enabled then
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+            local hum = char:FindFirstChild("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            hum.WalkSpeed = 16
+            if hum.MoveDirection.Magnitude > 0 then
+                hrp.Velocity = hum.MoveDirection * boostedSpeed + Vector3.new(0, hrp.Velocity.Y, 0)
+            end
+        end
+    end
+end)
+
+-- Infinite Jump system (Velocity method)
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            hrp.Velocity = Vector3.new(hrp.Velocity.X, 40, hrp.Velocity.Z) -- قوة قفز 40
         end
     end
 end)
