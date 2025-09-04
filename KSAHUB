@@ -1,4 +1,4 @@
--- Stable Speed Bypass with Slider
+-- Speed Bypass with Slider
 -- By KSAHUB
 
 local Players = game:GetService("Players")
@@ -78,7 +78,7 @@ end)
 -- Update speed from slider
 sliderBox.FocusLost:Connect(function()
     local val = tonumber(sliderBox.Text)
-    if val and val >= 16 and val <= 120 then
+    if val and val >= 16 and val <= 100 then
         boostedSpeed = val
         sliderLabel.Text = "Speed: "..boostedSpeed
     else
@@ -111,19 +111,14 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Stable Speed system
-RunService.RenderStepped:Connect(function()
-    if enabled then
-        local char = player.Character
-        if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
-            local hum = char:FindFirstChild("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-
-            -- الحفاظ على سرعة الحركة
-            hum.WalkSpeed = 16 -- نخليها عاديه عشان مانموتش
-            if hum.MoveDirection.Magnitude > 0 then
-                hrp.Velocity = hum.MoveDirection * boostedSpeed + Vector3.new(0, hrp.Velocity.Y, 0)
-            end
+-- Speed system (Velocity Bypass)
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    if enabled and char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
+        local moveDir = char:FindFirstChildOfClass("Humanoid").MoveDirection
+        if moveDir.Magnitude > 0 then
+            hrp.Velocity = moveDir * boostedSpeed
         end
     end
 end)
