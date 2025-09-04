@@ -1,9 +1,7 @@
--- KSAHUB ( Steal a Brainrot ) - Stable Speed
+-- KSAHUB ( Steal a Brainrot ) - Safe Speed
 -- By KSAHUB
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -72,6 +70,10 @@ speedButton.MouseButton1Click:Connect(function()
     else
         speedButton.Text = "OFF"
         speedButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+        -- رجّع السرعة العادية
+        if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+        end
     end
 end)
 
@@ -86,43 +88,12 @@ sliderBox.FocusLost:Connect(function()
     end
 end)
 
--- Draggable system
-local dragging, dragInput, dragStart, startPos
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
-    end
-end)
-frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Stable Speed system
-RunService.RenderStepped:Connect(function()
+-- Apply WalkSpeed safely
+game:GetService("RunService").RenderStepped:Connect(function()
     if enabled then
         local char = player.Character
-        if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
-            local hum = char:FindFirstChild("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-
-            hum.WalkSpeed = 16 -- سرعة أساسية عشان مانموتش
-            if hum.MoveDirection.Magnitude > 0 then
-                hrp.Velocity = hum.MoveDirection * boostedSpeed + Vector3.new(0, hrp.Velocity.Y, 0)
-            end
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid").WalkSpeed = boostedSpeed
         end
     end
 end)
